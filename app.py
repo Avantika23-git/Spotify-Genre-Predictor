@@ -1,26 +1,41 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-import joblib
+import requests
 
-# Load the data and model
-songs = pd.read_csv("deployment_songs.csv")
-embeddings = np.load("deployment_embeddings.npy")
-model = joblib.load("genre_model.pkl")
+st.set_page_config(
+    page_title="Spotify Genre Predictor",
+    page_icon="🎵"
+)
 
 st.title("🎵 Spotify Genre Predictor")
 
-song_name = st.selectbox("Choose a Song", songs["name"])
+st.write(
+    "Upload an MP3 song and predict its genre using AI."
+)
 
-if st.button("Predict Genre"):
-    row_index = songs[songs["name"] == song_name].index[0]
-    embedding = embeddings[row_index].reshape(1, -1)
-    
-    prediction = model.predict(embedding)[0]
-    actual = songs.iloc[row_index]["genre"]
-    artist = songs.iloc[row_index]["artists"]
+uploaded_file = st.file_uploader(
+    "Choose an MP3 file",
+    type=["mp3"]
+)
 
-    st.write(f"Artist: {artist}")
-    st.write(f"Actual Genre: {actual}")
+if uploaded_file is not None:
 
-    st.success(f"Predicted Genre: {prediction}")
+    st.audio(uploaded_file)
+
+    if st.button("Predict Genre"):
+
+        with st.spinner("Analyzing song..."):
+
+            files = {
+                "file": uploaded_file
+            }
+
+            response = requests.post(
+                "http://127.0.0.1:8000/predict",
+                files=files
+            )
+
+            result = response.json()
+
+            st.success(
+                f"Predicted Genre: {result['predicted_genre']}"
+            )

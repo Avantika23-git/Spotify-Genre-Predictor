@@ -1,0 +1,10 @@
+__pycache__/
+
+*.pkl
+*.npy
+*.mp3
+
+deployment_embeddings.npy
+deployment_songs.csv
+genre_model.pkl
+sample.mp3
